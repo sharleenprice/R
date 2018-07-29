@@ -1,0 +1,180 @@
+---
+title: "Homework4"
+author: "Sharleen Price spp2122"
+date: "4/5/2018"
+output: pdf_document
+---
+1)
+```{r}
+#install.packages("plyr")
+library(plyr)
+debt <- read.csv("debt.csv", as.is = TRUE)
+
+mean.growth <- function(df){
+  return(mean(df$growth))
+}
+#?daply
+each_country<- split(debt, debt$Country)
+signif(daply(debt, "Country", mean.growth), 3)
+
+head(debt)
+```
+2)
+
+```{r}
+growth.year<-signif(daply(debt, "Year", mean.growth), 3)
+growth.year
+
+plot(unique(debt$Year),growth.year, xlab = "Year", ylab = "Growth")
+
+```
+3)
+```{r}
+signif(cor(debt$growth, debt$ratio), 4)
+
+cor_function <- function(df){
+  return(cor(df$growth, df$ratio))
+}
+#correlation of each country
+country_cor<-daply(debt, "Country", cor_function)
+hist(country_cor, breaks=10)
+signif(mean(country_cor),4)
+
+
+year_cor<-daply(debt, "Year", cor_function)
+hist(year_cor, breaks = 10)
+signif(mean(year_cor),4)
+
+
+countries<- unique(debt$Country)
+#length(country_cor)
+
+```
+d. None of the countries or years have a corrrlation that goes against the general trend.
+
+4)
+```{r}
+linear_mod<-lm(debt$growth~debt$ratio)
+linear_mod
+plot(debt$ratio, debt$growth, xlab="Ratio", ylab="Growth")
+abline(linear_mod)
+?scale
+?apply
+pmin(cor(debt$growth, debt$ratio))
+```
+5)
+```{r}
+
+
+countries<- unique(debt$Country)
+print(length(countries))
+for(i in 1:length(country_cor)){
+  if (country_cor[i] < -1*0.5){
+    print(countries[i])
+    con<-debt[debt$Country==countries[i],]
+    #par(mfrow=c(2,2))
+    plot(con$ratio,con$growth, main = countries[i], xlab="Ratio", ylab="Growth")
+    
+    }
+      
+  }
+
+    
+
+
+
+
+```
+6)
+```{r}
+France<-debt[debt$Country=="France",]
+dim(France)
+head(France)
+
+next.growth<-c()
+
+for(i in 1:length(France$Year)){
+  years<-France$Year[i+1]
+
+  if(i==length(France$Year)){
+    next.growth<-append(next.growth, NA)
+  }
+
+  else if(France$Year[i]+1 == years){
+    next.growth<-append(next.growth, signif(France$growth[i+1],4))
+  }
+
+  else{
+    next.growth<-append(next.growth, NA)
+  }
+}
+
+France$next.growth<-next.growth
+
+
+for (i in 1:length(France$Year)){
+  France$Year[i]
+  if (France$Year[i]==1971){
+    print(France$next.growth[i])
+  }
+  if (France$Year[i]==1972){
+    print(France$next.growth[i])
+  }
+}
+
+```
+
+
+7)
+```{r}
+total.next.growth<- function(df){
+  next.growth<-c()
+
+for(i in 1:length(df$Year)){
+  years<-df$Year[i+1]
+
+  if(i==length(df$Year)){
+    next.growth<-append(next.growth, NA)
+  }
+
+  else if(df$Year[i]+1 == years){
+    next.growth<-append(next.growth, signif(df$growth[i+1],4))
+  }
+
+  else{
+    next.growth<-append(next.growth, NA)
+  }
+}
+
+df$next.growth<-next.growth  
+return(df)
+}
+
+debt <- ddply(debt, "Country", total.next.growth)
+
+France<-debt[debt$Country=="France",]
+for (i in 1:length(France$Year)){
+  if (France$Year[i]==2009){
+    print(France$next.growth[i])
+  }
+  
+}
+```
+8)
+```{r}
+linear_mod<-lm(debt$next.growth~debt$ratio)
+linear_mod
+plot(debt$ratio, debt$next.growth, xlab="Ratio", ylab="Next Years Growth")
+abline(linear_mod)
+
+```
+ The next year regression is -0.01161   which is slightly higher than the current year's regression of -0.01836.
+ 
+ 9)
+```{r}
+linear_mod<-lm(debt$growth~debt$next.growth)
+linear_mod
+plot(debt$growth, debt$next.growth, xlab="Growth", ylab="Next Years Growth")
+abline(linear_mod)
+```
+As shown by our plots, current growth is a better indicator for future growth because the slope is positive which make sense with the increasing  growth between current and next year.

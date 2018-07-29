@@ -1,0 +1,58 @@
+---
+title: "HW3"
+author: "Sharleen Price spp2122"
+date: "3/23/2018"
+output: pdf_document
+---
+practice
+```{r}
+nets1718 <- readLines("NetsSchedule1718.html")
+
+```
+
+i.
+```{r}
+
+
+length(nets1718)
+
+total=0
+sum(nchar(nets1718))
+
+
+# #typeof(nchar(nets1718)[1])
+# for (i in (nets1718)){
+#   total= total + nchar(strsplit(i, split = ""))
+# }
+# total
+# max.line = 0
+# for (i in (nets1718))
+# {
+#   split <-strsplit(i, split="")
+#   if(nchar(split)>max.line)
+#     {
+#     max.line <- nchar(split)
+#     }
+#  }
+# max.line
+?grep
+```
+ia) there are 267 lines
+ib) there are  a total of 93599 characters in the file
+ic)the maximum number of characters is 7599
+
+ii.
+The Brooklyn Nets are first playing the Indiana Pacers in Indiana on October 18 2017
+Their last game is against the Boston Celtics in Boston on April 11 2018
+
+iii.
+
+
+
+
+
+
+
+
+
+

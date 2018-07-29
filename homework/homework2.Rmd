@@ -1,0 +1,108 @@
+---
+title: "homework2"
+author: "Sharleen Price spp2122"
+date: "2/19/2018"
+output: pdf_document
+---
+i) Load the data into a dataframe called housing.ii)  How many rows and columns does the dataframe have?
+iii) Run this command, and explain, in words, what this does
+```{r}
+housing <- read.csv("NYChousing.csv", as.is=TRUE)
+dim(housing)
+apply(is.na(housing), 2, sum)
+head(housing)
+```
+ii. The data has 2506 rows and 22 columns
+iii.This command goes through all the columns and checks if it has a value or if it is NA, it only counts it if its NA. Then it applies the sum function so that we can list the total amount of NA values in each category.
+
+iv.Remove the rows of the dataset for which the variable Valueis NA.
+v.How many rows did you remove with the previous call?  Does this agree with your resultfrom (iii)?
+```{r}
+housing <- housing[!is.na(housing$Value), ]
+dim(housing)
+```
+v. I removed 1876 rows and it does agree with the result from iii.
+
+vi.vii.viii.
+
+vi.Create a new variable in the dataset calledlogValuethat is equal to the logarithm ofthe property’sValue.  What are the minimum, median, mean, and maximum values oflogValue?
+vii.Create a new variable in the dataset calledlogUnitsthat is equal to the logarithm ofthe number of units in the property.  The number of units in each piece of property isstored in the variableUnitCount.
+vii. Finally  create  a  new  variable  in  the  dataset  called after1950 which  equals TRUE if the property was built in or after 1950 and FALSE otherwise.  You’ll want to use the YearBuilt variable here.  This can be done in a single line of code.
+
+```{r}
+housing$logValue <- log(housing$Value)
+summary(housing$logValue)
+
+housing$logUnits <-log(housing$UnitCount)
+housing$after1950 <-housing$YearBuilt>=1950
+
+```
+
+Part 2
+i.Plot propertylogValueagainst propertylogUnits.  Name the x and y labels of theplot appropriately.logValueshould be on the y-axis.
+ii.Make the same plot as above, but now include the argument col = factor(housing$after1950).Describe this plot and the covariation between the two variables. What does the coloring in the plot tell us?
+```{r}
+plot(housing$logUnits,housing$logValue, col = factor(housing$after1950), xlab = "Log of Units", ylab = "Log of Value")
+
+legend("bottomright", legend = levels(factor(housing$after1950)), fill = unique(factor(housing$after1950)))
+
+cor(housing$logUnits, housing$logValue)
+
+```
+ii. The plot shows how the value of the apartments increased as the amount of units in the property increased. The colors show that after the 1950, bigger buildings with more units were built and thus also became more expensive.
+
+iii.The cor()function calculates the correlation coefficient between two variables.  Whatis the correlation between propertylogValueand propertylogUnitsin (i) the wholedata, (ii) just Manhattan (iii) just Brooklyn (iv) for properties built after 1950 (v) forproperties built before 1950?
+```{r}
+Manhattan <- housing[housing$Borough == "Manhattan",]
+cor(Manhattan$logUnits, Manhattan$logValue)
+
+Brooklyn <- housing[housing$Borough == "Brooklyn",]
+cor(Brooklyn$logUnits, Brooklyn$logValue)
+
+after<- housing[housing$after1950,]
+cor(after$logUnits, after$logValue)
+
+before<-housing[housing$YearBuilt<1950,]
+cor(before$logUnits, before$logValue)
+```
+
+iv.Make two plots showing propertylogValueagainst propertylogUnitsfor Manhattanand Brooklyn.(If you can fit the information into one plot, clearly distinguishing thetwo boroughs, that’s OK too.)
+```{r}
+plot(Manhattan$logUnits, Manhattan$logValue, col = factor(housing$after1950),main = "Manhattan",xlab = "Log of Units", ylab = "Log of Value")
+legend("bottomright", legend = levels(factor(housing$after1950)), fill = unique(factor(housing$after1950)))
+
+plot(Brooklyn$logUnits, Brooklyn$logValue, col = factor(housing$after1950),main = "Brooklyn", xlab = "Log of Units", ylab = "Log of Value")
+legend("bottomright", legend = levels(factor(housing$after1950)), fill = unique(factor(housing$after1950)))
+```
+
+v.Consider the following block of code.  Give a single line of R code which gives the samefinal answer as the block of code.  There are a few ways to do this.
+```{r}
+manhat.props <- c()
+    for (props in 1:nrow(housing)) {
+      if (housing$Borough[props] == "Manhattan") {
+        manhat.props <- c(manhat.props, props)
+      }
+}
+    med.value <- c()
+    for (props in manhat.props) {
+      med.value <- c(med.value, housing$Value[props])
+    }
+    med.value <- median(med.value, na.rm = TRUE)
+    
+    med.value
+    
+    
+    median(housing$Value[housing$Borough=="Manhattan"],na.rm = TRUE) 
+```
+
+vi.Make side-by-side box plots comparing propertylogValueacross the five boroughs.
+```{r}
+boxplot(housing$logValue~housing$Borough,main="Housing by Borough",ylab="log of Property Value", data=housing)
+```
+
+
+vii.For five boroughs, what are the median property values? (UseValuehere, notlogValue.)
+```{r}
+tapply(housing$Value,housing$Borough,median)
+```
+

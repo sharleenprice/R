@@ -1,0 +1,191 @@
+---
+title: "gn2244_HW4"
+author: "Giuliana Noto"
+date: "April 5, 2018"
+output: pdf_document
+---
+
+```{r}
+library(plyr)
+debt <- read.csv("debt.csv", as.is = TRUE)
+dim(debt)
+head(debt)
+```
+
+Write function that takes mean of the "growth" column of the dataframe 
+```{r}
+mean.growth <- function(df){
+ Y <- df$growth
+ return(mean(Y))
+}
+```
+
+Use daply() to apply mean.growth() to each country in debt.
+```{r}
+#daply(dataset,column in quotes, function) - applying 3 sig figs. 
+signif(daply(debt,"Country",mean.growth),3) 
+```
+
+```{r}
+av_growthrate<- signif(daply(debt,"Year",mean.growth),3) #Get growth rate per year 
+av_growthrate
+
+unique_years <- unique(debt$Year) #separate all individual years in debt$Years 
+plot(unique_years,av_growthrate,xlab="Year",ylab="Average GDP Growth Rate",main="Average GDP Growth Rate per Year")
+
+```
+
+The function cor(x,y) calculates the correlation coefficient between two vectors x and y.
+
+Calculate the correlation coefficient between GDP growth and the debt ratio over the whole data set (all countries, all years). Your answer should be −0.1995.
+```{r}
+signif(cor(debt$growth,debt$ratio),4)
+```
+
+Compute the correlation coefficient separately for each country, and plot a histogram of these coefficients (with 10 breaks). The mean of these correlations should be −0.1778. Do not use a loop. (Hint: consider writing a function and then making it an argument to daply()).
+```{r}
+compute.correlation <- function(df){
+ return(cor(df$growth,df$ratio))
+}
+
+country_correlations <- daply(debt,"Country",compute.correlation)
+
+signif(mean(country_correlations),4)
+hist(country_correlations,breaks=10)
+
+```
+
+Calculate the correlation coefficient separately for each year, and plot a histogram of these coefficients. The mean of these correlations should be −0.1906.
+```{r}
+year_correlations <- daply(debt,"Year",compute.correlation)
+signif(mean(year_correlations),4)
+hist(year_correlations,breaks=10)
+```
+
+3.d) Are there any countries or years where the correlation goes against the general trend?
+
+
+4) Fit a linear model of overall growth on the debt ratio, using lm(). Report the intercept and slope. Make a scatter-plot of overall GDP growth (vertical) against the overall debt ratio (horizontal). Add a line to your scatterplot showing the fitted regression line.
+```{r}
+#lm(Y~X)
+model_growth_ratio<- lm(debt$growth~debt$ratio)
+model_growth_ratio
+plot(debt$ratio,debt$growth,xlab="Overall Debt Ratio",ylab="Overall GDP Growth",main="Debt Ratio vs. GDP Growth",col="blue")
+abline(model_growth_ratio)
+```
+
+5) There should be four countries with a correlation smaller than -0.5. Separately, plot GDP growth versus debt ratio from each of these four countries and put the country names in the titles. This should be four plots. Call par(mfrow=c(2,2)) before plotting so all four plots will appear in the same figure.
+
+(Think about what this shows: individual relationships at the country level are some- times concealed or ”smudged out” when data is aggregated over all groups (countries). This conveys the importance of careful analysis at a more granular group level, when such groupings are available!)
+```{r}
+par(mfrow=c(2,2))
+
+truthvec_below0.5<-(country_correlations<(-0.5))
+country_names <- c(names(country_correlations[truthvec_below0.5]))
+for(i in country_names){
+  dataframes <- subset(debt,debt$Country==i)
+  plot(dataframes$ratio,dataframes$growth,xlab="Debt Ratio",ylab="GDP Growth",main=i)
+}
+
+```
+
+6.a) Create a new data frame which just contains the rows of debt for France, but contains all those rows. It should have 54 rows and 4 columns (print the dimen- sions of your data frame). Note that some years are missing from the middle of this data set.
+```{r}
+France_subset<-subset(debt,debt$Country=="France")
+dim(France_subset)
+```
+
+6.b) Create a new column in your data frame for France, next.growth, which gives next year’s growth if the next year is in the data frame, or NA if the next year
+```{r}
+
+length_subset <- length(France_subset$Year) #get year column length 
+
+for(i in (1:length_subset)){
+  
+  currentyear = (France_subset$Year)[i]
+  nextyear = (France_subset$Year)[i+1]
+
+  if(i==length_subset){
+    France_subset$next.growth[i] <- NA 
+  }
+  
+  else if((currentyear+1) == (nextyear)){
+    France_subset$next.growth[i] <- signif((France_subset$growth)[i+1],4)
+  }
+  
+  else{
+    France_subset$next.growth[i] <- NA
+  }
+}
+
+France_subset$next.growth[(France_subset$Year==1971)]
+France_subset$next.growth[(France_subset$Year==1972)]
+```
+
+7) Add a next.growth column, as in the previous question, to the whole of the debt data frame.
+
+Make sure that you do not accidentally put the first growth value for one country as the next.growth value for another. (The next.growth for France in 2009 should be NA, not 9.167. Print this value.) 
+
+Hints: Write a function to encapsulate what you did in the previous question, and apply it using ddply().
+```{r}
+
+next.growth.fun <- function(df){
+
+  for(i in (1:length(df$Year))){ 
+    currentyear = df$Year[i]
+    nextyear = df$Year[i+1]
+
+    if(i==length(df$Year)){ 
+      df$next.growth[i] <- NA
+    }
+
+    else if((currentyear+1) == (nextyear)){
+      df$next.growth[i] <- (df$growth)[i+1]
+    }
+
+    else{
+      df$next.growth[i] <- NA
+    }
+  }
+  return(df)
+}
+
+new_debt <- ddply(debt,"Country",next.growth.fun)
+
+#print value of france for 2009 
+France_debt <- subset(new_debt,new_debt$Country=="France")
+France_debt$next.growth[(France_debt$Year==2009)]
+```
+
+8) Make a scatter-plot of next year’s GDP growth against this year’s debt ratio.
+
+Linearly regress next year’s growth rate on the current year’s debt ratio, and add the line to the plot. 
+
+Report the intercept and slope to reasonable precision. 
+
+How do they compare to the regression of the current year’s growth on the current year’s debt ratio?
+```{r}
+model_growth_ratio<- lm(new_debt$next.growth~new_debt$ratio)
+model_growth_ratio
+plot(new_debt$ratio,new_debt$next.growth,xlab="Current Year's Debt Ratio",ylab="Next Year's GDP Growth",main="Next Year's GDP Growth against Current Year's Debt Ratio",col="blue")
+abline(model_growth_ratio)
+
+
+```
+The regression of the current year’s growth on the current year’s debt ratio was slightly more steep than the regression of the next year's growth vs. this year's debt ratio. 
+
+9. Make a scatter-plot of next year’s GDP growth against the current year’s GDP growth.
+
+Linearly regress next year’s growth on this year’s growth, and add the line to the plot. Report the coefficients. 
+
+Can you tell, from comparing these two simple regressions (from the current question, and the previous), whether current growth or current debt is a better predictor of future growth?
+```{r}
+
+model_growth_ratio<- lm(new_debt$next.growth~new_debt$growth)
+model_growth_ratio
+
+plot(new_debt$growth,new_debt$next.growth,xlab="Current Year's GDP Growth",ylab="Next Year's GDP Growth",main="Next year’s GDP growth against the current year’s GDP growth", col="blue")
+abline(model_growth_ratio)
+```
+Current Growth is a better predictor for future growth, as the regression shows an increasing trend which alings with future growth. 
+

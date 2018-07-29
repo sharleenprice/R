@@ -1,0 +1,120 @@
+---
+title: "Homework 5"
+author: "Sharleen Price spp2122"
+date: "4/25/2018"
+output: 
+  pdf_document: 
+    latex_engine: xelatex
+---
+
+
+1) reject-accept
+```{r}
+
+#1) function
+f<-  function(x){
+  return(ifelse((-1<=x | 2>=x),(1/9)*(4-x^2),0))
+}
+
+x <- seq(-1, 2, length = 100)
+f.max=max(f(x))
+f.max
+plot(x, f(x), type="l", ylab="f(x)")
+
+#envelope
+e <- function(x) {
+  return(ifelse((-1 > x | x > 2), Inf, f.max))
+}
+lines(c(-1, -1), c(f(-1), e(-1)), lty = 1)
+lines(c(2, 2), c(0, e(2)), lty = 1)
+lines(x, e(x), lty = 1)
+
+#accept-reject algorithm 
+alp=0
+n.samps <- 1000   # number of samples desired> 
+n       <- 0                     # counter for number samples accepted> 
+samps   <- numeric(n.samps) # initialize the vector of output> 
+while (n < n.samps) 
+  {
+   y <- runif(1,-1,2)    #random draw from g   
+   u <- runif(1) 
+   if (u < f(y)/e(y))
+     alp=alp+1
+     {n <- n + 1     
+     samps[n] <- y  } #simulated data
+}
+alp
+#histogram
+hist(samps, prob = T, ylab = "f(x)", xlab = "x", main = "Histogram of draws from g(x) ")
+
+lines(x, f(x), lty = 2)
+
+```
+2) Regression and Empirical Size
+
+Regression 1,2: Read in the grocery retailer dataset.Name the dataset grocery. Use the least squares equationˆβ= (XTX)−1XTYto estimate regression model (2).To estimate the model, use the linear model function inR, i.e., uselm.
+```{r}
+grocery <- read.table("grocery.txt", header = TRUE, as.is = TRUE)
+head(grocery)
+n<-nrow(grocery)
+a=ncol(grocery)
+
+X <- cbind(rep(1,52), grocery$X1, grocery$X2, grocery$X3)
+beta_hat <- solve((t(X) %*% X)) %*% t(X) %*% grocery$Y
+round(t(beta_hat), 2)
+
+lm0 <- lm(Y ~ X1 + X2 + X3, data = grocery)
+lm0
+
+```
+Regression 3: Use R to estimate σ2, i.e., computeMSE=1n−4∑ni=1(Yi−ˆYi)2.  To perform this task,use theresidualsfunction.
+```{r}
+mse<- mean(lm0$residuals^2)
+mse
+#summary(lm0)
+
+```
+2.2 Test Slope
+
+```{r}
+summary(lm0)
+```
+
+2.3 Sampling Distribution
+
+1)
+```{r}
+R<- 10000
+stat.list<-rep(NA,R)
+beta.list<-rep(NA,R)
+for (i in 1:R){
+  y.sim<- 4200-0*grocery$X1+15*grocery$X2+620*grocery$X3 + rnorm(52, mean=0, sd = sqrt(20500))
+  model.sim<-lm(y.sim~grocery$X1+grocery$X2+grocery$X3)
+  stat.list[i]<-summary(model.sim)[[4]][2,3]
+  
+}
+#stat.list
+head(stat.list)
+
+
+```
+2)
+```{r}
+hist(stat.list, probability = TRUE, breaks = 40)
+t.list2<-seq(-5,5,by=.01)
+lines(t.list2, dt(t.list2, 48), col = "green")
+
+
+quantile(stat.list, .9) #simulated quantile
+qt(.9, 48) #true quantile
+
+quantile(stat.list, .95) #simulated quantile
+qt(.95, 48) #true quantile
+
+quantile(stat.list, .99) #simulated quantile
+qt(.99, 48) #true quantile
+```
+
+
+  
+

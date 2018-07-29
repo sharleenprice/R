@@ -1,0 +1,157 @@
+---
+title: "Review"
+author: "Sharleen Price spp2122"
+date: "2/28/2018"
+output: pdf_document
+---
+```{r}
+#import a dataset
+
+#housing <- read.csv("NYChousing.csv", as.is=TRUE)
+#<-readLine("honocode.txt")
+titanic <-read.table("Titanic.txt", header = TRUE, as.is = TRUE)
+
+```
+
+```{r}
+#getting na values
+apply(is.na(titanic), 2, sum)
+
+#clean the data set
+titanic <- na.omit(titanic)
+
+w <- c(-3, 20, 9, 2)
+w[w > 3] #returns 20,9
+
+```
+The call substr(string, start = , stop = ) returns the substring
+from character position start to stop the given string.
+substr(phrase, start = 8, stop = 12)
+
+grep("students", HC) returns index of pattern
+head(grepl("students", HC), 15) returns true or false vector based on pattern
+
+for (i in 1:length(name_split)){
+  split_comma<-append(split_comma,name_split[[i]][2])
+}
+M[M[,3] < 8, ]  data[truthVector,]
+
+mean(t, na.rm = TRUE)
+ifelse()
+Versicolor <- ifelse(iris[,5]=="versicolor",1,0), if true->1,else->0
+
+Switzerland.strikes <- subset(strikes, country == "Switzerland")
+
+
+```{r}
+#construct a base r plot
+
+#lab 3 question 3
+boxplot(Sepal.Width~Versicolor,main="Sepal of Versicolor vs Others",ylab="width",data=iris)
+#boxplot(y~x, )
+
+```
+plot(Switzerland.strikes$year,Switzerland.strikes$inflation,
+      main="Switzerland's Inflation Rate vs Time", xlab="Time",ylab="Inflation Rate",
+      col="blue",type="l")  
+hist(normal100)
+
+plot(xval,yval, color, xlab = "Log of Units", ylab = "Log of Value", main = "Title")
+legend("bottomright", legend = levels(factor(housing$after1950)), fill = unique(factor(housing$after1950)))
+
+plot(BK$logUnits, BK$logValue, xlab="log(Units)", ylab="log(Value)", main="log(Property Value) vs log(Property Units)", ylim=c(9,21),col=11)
+points(Manhattan$logUnits, Manhattan$logValue, col=4)
+legend("bottomright", legend = c("Brooklyn","Manhattan"), fill=c(11,4))
+
+```{r}
+#construct a ggplot
+library(ggplot2)
+
+```
+***Lab 5***
+gplot(data = iris)+
+geom_point(mapping = aes(x=Sepal.Length,y=Petal.Length,color = Species))+
+  geom_abline(data = my.slopes,mapping=aes(slope=Sepal.Length,intercept=X.Intercept.,color=Species) )+ labs(title = "Sharleen's Plot") +  geom_point(aes(x=4.9,y=4.5), shape = 8, color =4) +geom_text(x = 4.9, y = 4.8, label = "(4.9, 4.5)", color = 4)+geom_point(aes(x=5.1,y=3), shape = 8, color =3) +geom_text(x = 5.1, y = 2.7, label = "(5.1, 3)", color = 3)+geom_point(aes(x=5.1,y=3), shape = 8, color =3) +geom_point(aes(x=5.8,y=1.2), shape = 8, color =2)+geom_text(x = 5.8, y = 1, label = "(5.8, 1.2)", color = 2)
+  
+  ggplot(data = wtid)+
+geom_line(mapping = aes(x=Year,y=P99,color = "P99"))+geom_line(mapping = aes(x=Year,y=P99.5, color = "P99.5"))+geom_line(mapping = aes(x=Year,y=P99.9, color = "P99.9")) + labs(x = "Time" ,y="Income Treshold", title="Plot")
+
+ggplot(data=titanic) +
+  geom_bar(aes(x=Sex,fill=factor(Survived)))+
+  labs(title = "Title",fill="Survived")
+  
+  ggplot(data=titanic) +
+  geom_bar(aes(x=factor(Survived),fill=factor(Survived)))+
+  facet_grid(~Sex)+
+  labs(title = "Title",fill="Survived",x="")
+  
+ 
+```{r}
+#use charater string functions
+
+```
+ 
+take a loop and write as one or two lines of code
+```{r} 
+#homework 1 question v
+classes2 <- sort(unique(titanic$Pclass))
+Pclass.Survival2 <- vector("numeric", length = 3)
+names(Pclass.Survival2) <- classes
+
+Pclass.Survival2<-round((tapply(titanic$Survived,titanic$Pclass,mean)),2)
+
+
+```
+ 
+*** Homework 2 question v***
+ manhat.props <- c()
+    for (props in 1:nrow(housing)) {
+      if (housing$Borough[props] == "Manhattan") {
+        manhat.props <- c(manhat.props, props)
+      }
+}
+    med.value <- c()
+    for (props in manhat.props) {
+      med.value <- c(med.value, housing$Value[props])
+    }
+    med.value <- median(med.value, na.rm = TRUE)
+    
+    med.value
+    
+    median(housing$Value[housing$Borough=="Manhattan"],na.rm = TRUE) 
+    
+classes2 <- sort(unique(titanic$Pclass))
+Pclass.Survival2 <- vector("numeric", length = 3)
+names(Pclass.Survival2) <- classes
+
+Pclass.Survival2<-round((tapply(titanic$Survived,titanic$Pclass,mean)),2)
+
+
+***lab 3 question 6***
+for (j in measurements) {
+  MeanFlowers[j,]<-tapply(iris[,j],iris$Species,mean)
+}
+MeanFlowers
+
+
+```{r}
+?sapply
+```
+
+first.element <- function(vec){
+  return(vec[1])
+}
+
+?sapply()
+
+***Giuli's lab 6 Question 3***
+titanic$Title <- (sapply(strsplit(titanic$Name,split=", "),FUN=function(vec) vec[2]))
+titanic$Title <- (sapply(strsplit(titanic$Title,split=" "),FUN=function(vec) vec[1]))
+
+titles <- c("Miss.","Mrs.","Mr.","Master.")
+other_title_logical <- !(titanic$Title %in% titles)
+titanic$Title[other_title_logical] <- "Other."
+
+head(titanic$Title,10)
+
+ 

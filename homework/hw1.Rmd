@@ -1,0 +1,82 @@
+---
+title: "hw1_spp2122"
+output: pdf_document
+author: "Sharleen Price"
+---
+Part 1 
+
+i) Import the titanic dataset intoRStudio usingread.table().  Use the argumentas.is= TRUE. The dataset should be stored in a data frame calledtitanic.
+```{r}
+titanic <-read.table("Titanic.txt", header = TRUE, as.is = TRUE) #text file as table
+
+
+```
+
+ii)How many rows and columns doestitanichave?  (If there are not 891 rows and 12columns something is wrong.  Check part (i) to see what could have gone wrong.)
+```{r}
+dim(titanic)
+```
+
+iii)Create a new variable in the data frame calledSurvived.Word.  It should read either“survived” or “died” indicating whether the passenger survived or died.  This variableshould be of type ‘character’.
+```{r}
+titanic$Survived.Word <- ifelse(titanic$Survived == 1, "Survived", "Died")
+```
+Part 2
+
+i)Use theapply()function to calculate the mean of the variablesSurvived,Age, andFare. This will require using theapply()function on a sub-matrix of dimension 891×3.Explain  what  the  mean  ofSurvivedtells  us.   One  of  the  mean  values  isNA.  Whichvariable has a mean value ofNAand why is this the case?
+```{r}
+mat <-titanic[,c("Survived","Age","Fare")]
+apply(mat, 2, mean)
+```
+The survived mean tells us that only 38% of people survived the Titanic. Age says NA because not all ages of all people on the titanic is known.
+
+ii)compute the proportion of female passengers who survived the titanic disaster.  Roundyour answer to 2 decimals using theround()function.  Hint?round.Note:This isnot a conditional probability.
+```{r}
+survivors = titanic[titanic$Survived == 1,]
+females_survivors = survivors[survivors$Sex=="female",]
+round(nrow(females_survivors)/nrow(titanic),2)
+
+
+
+```
+
+iii)Of the survivors, compute the proportion of female passengers.  Round your answer to 2decimals.  This answer may take a few lines of code.  One strategy would be to create asurvivorsmatrix that only includes individuals who survived the disaster.  Then usingthesurvivedmatrix, calculate the proportion of females.Note:This is a conditionalprobability.
+```{r}
+round(nrow(females_survivors)/nrow(survivors),2)
+
+```
+
+
+iv)Use a for loop to fill in the Pclass.Survival vector with the survival rates for each class.  The statements inside the loop should update the vectorPclass.Survivalwith the survival rate (the proportion of people who survived) for each class. 
+```{r}
+classes <- sort(unique(titanic$Pclass))
+Pclass.Survival <- vector("numeric", length = 3)
+names(Pclass.Survival) <- classes
+
+for (i in 1:3) 
+{
+ Pclass.Survival[i]<-round((nrow(survivors[survivors$Pclass==i,])/nrow(titanic[titanic$Pclass==i,])),2)
+}
+
+Pclass.Survival
+```
+
+v)Now create a Pclass.Survival2 vector that should equal the Pclass.Survival vectorfrom the previous question, but use the tapply()function.  Again, round the values to2 decimals.
+```{r}
+classes2 <- sort(unique(titanic$Pclass))
+Pclass.Survival2 <- vector("numeric", length = 3)
+names(Pclass.Survival2) <- classes
+
+Pclass.Survival2<-round((tapply(titanic$Survived,titanic$Pclass,mean)),2)
+
+
+Pclass.Survival2
+```
+
+
+vi)vi.  Does there appear to be a relationship between survival rate and class?
+
+Yes, there is a relationship between survival rate and class. It seems that the survival rate increases as the class increased and so high class had a higher rate of survival than the lower class. 
+
+
+
